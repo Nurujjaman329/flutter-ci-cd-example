@@ -15,7 +15,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    # Set working directory if your pubspec.yaml is nested inside a subfolder
+    # Set working directory if your  pubspec.yaml is nested inside a subfolder
     defaults:
       run:
         working-directory: ci_cd_example/ci_cd_example

@@ -15,9 +15,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    # Set working directory if your pubspec.yaml is nested inside a subfolder
+    defaults:
+      run:
+        working-directory: ci_cd_example/ci_cd_example
+
     steps:
       - uses: actions/checkout@v4
 
+      # Setup Dart SDK
       # Note: This workflow uses the latest stable version of the Dart SDK.
       # You can specify other versions if desired, see documentation here:
       # https://github.com/dart-lang/setup-dart/blob/main/README.md
@@ -35,8 +41,15 @@ jobs:
       - name: Analyze project source
         run: dart analyze
 
-      # Your project will need to have tests in test/ and a dependency on
-      # package:test for this step to succeed. Note that Flutter projects will
-      # want to change this to 'flutter test'.
+      # Run tests (change to 'flutter test' if this is a Flutter project)
       - name: Run tests
         run: dart test
+
+      # Example step that requires a token (e.g. for uploading releases or calling GitHub API)
+      # Make sure you add a secret TOKEN in your repository's secrets!
+      - name: Example: Upload Release or Use Token
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: build/app/outputs/apk/release/*.apk
+          tag: v1.0.${{ github.run_number }}
+          token: ${{ secrets.TOKEN }}

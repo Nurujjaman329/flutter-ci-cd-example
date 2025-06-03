@@ -1,0 +1,60 @@
+name: Build & Release
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    # 👇 This is the fix: set the working directory for all run steps
+    defaults:
+      run:
+        working-directory: ci_cd_example
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Java 12
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '12'
+
+      - name: Install Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          architecture: x64
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Android APK
+        run: flutter build apk --release --split-per-abi
+
+      - name: Build iOS .ipa
+        run: |
+          flutter build ios --no-codesign
+          cd build/ios/iphoneos
+          mkdir Payload
+          ln -s ../Runner.app Payload/Runner.app
+          zip -r app.ipa Payload
+
+      - name: Upload to GitHub Releases
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: |
+            build/app/outputs/apk/release/*.apk
+            build/ios/iphoneos/app.ipa
+          tag: v1.0.${{ github.run_number }}
+          token: ${{ secrets.TOKEN }}
